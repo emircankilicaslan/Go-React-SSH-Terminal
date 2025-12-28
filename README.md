@@ -29,9 +29,6 @@ Architecture & Strategy: AI was used to evaluate the most efficient tech stack f
 
 Targeted Code Assistance: AI was utilized specifically for complex boilerplate sections, such as the initial setup of the WebSocket-SSH bridge and JWT middleware.
 
-Optimization & Debugging: During development, AI helped in analyzing specific error logs and optimizing real-time data streaming between the backend and frontend.
-
-Human-Led Development: All AI-generated suggestions were manually reviewed, debugged, and integrated into the final architecture by the developer to ensure system stability and security.
 
 
 
