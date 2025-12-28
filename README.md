@@ -41,4 +41,3 @@ This project was developed entirely with the assistance of Artificial Intelligen
 3.  **Access:** Open `http://localhost:5173`
 
 ---
-*Developed as a Full Stack Technical Assignment*
