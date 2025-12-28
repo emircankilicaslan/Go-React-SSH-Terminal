@@ -21,11 +21,7 @@ The application follows a modern full-stack architecture:
     * A WebSocket channel opens.
     * The terminal interface appears, connected directly to the remote server.
 
-## 🤖 AI Development Process Summary
-This project was developed entirely with the assistance of Artificial Intelligence (**Claude 4.5 Opus** & **Gemini**) as a pair programmer, in accordance with the assignment requirements.
-* **Architecture Design:** AI was used to determine the optimal tech stack (Go + React) and database choice (SQLite) for the given requirements.
-* **Code Generation:** Core functionalities, including the WebSocket-SSH bridge and JWT authentication middleware, were generated iteratively with AI prompts.
-* **Debugging:** Error logs and connection issues were analyzed by AI to provide rapid solutions (e.g., resolving CGO dependencies for SQLite).
+
 
 ## 🛠️ Tech Stack
 | Component | Technology |
