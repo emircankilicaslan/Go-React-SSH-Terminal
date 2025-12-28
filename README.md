@@ -40,4 +40,8 @@ This project was developed entirely with the assistance of Artificial Intelligen
 2.  **Frontend:** `cd frontend` -> `npm run dev`
 3.  **Access:** Open `http://localhost:5173`
 
+   <img width="253" height="423" alt="image" src="https://github.com/user-attachments/assets/d9dde264-d989-4bbd-8571-ba8f777b23d5" />
+<img width="1263" height="741" alt="image" src="https://github.com/user-attachments/assets/2fca6743-7d1b-4fb1-a33f-96e6d1464b4f" />
+
+
 ---
