@@ -1,4 +1,4 @@
-# 🚀 Go-React-SSH-Terminal
+#  Go-React-SSH-Terminal
 
 A secure, full-stack web-based SSH terminal client built with **Go (Golang)** and **React**.
 This project demonstrates a complete system architecture including JWT-based authentication, real-time WebSocket communication, and persistent server management via SQLite.
