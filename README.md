@@ -20,6 +20,17 @@ The application follows a modern full-stack architecture:
     * The system validates the credentials.
     * A WebSocket channel opens.
     * The terminal interface appears, connected directly to the remote server.
+  
+ 🤖 AI Development Process Summary
+This project was developed with the strategic assistance of Artificial Intelligence (Claude 4.5 Opus & Gemini) as a technical consultant and pair programmer, while the overall architecture and logic were manually controlled and refined by the developer.
+
+Architecture & Strategy: AI was used to evaluate the most efficient tech stack for the requirements. The decision to use Go for the backend and xterm.js for the terminal was finalized through these consultations.
+
+Targeted Code Assistance: AI was utilized specifically for complex boilerplate sections, such as the initial setup of the WebSocket-SSH bridge and JWT middleware.
+
+Optimization & Debugging: During development, AI helped in analyzing specific error logs and optimizing real-time data streaming between the backend and frontend.
+
+Human-Led Development: All AI-generated suggestions were manually reviewed, debugged, and integrated into the final architecture by the developer to ensure system stability and security.
 
 
 
