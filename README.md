@@ -49,14 +49,11 @@ Targeted Code Assistance: AI was utilized specifically for complex boilerplate s
 2.  **Frontend:** `cd frontend` -> `npm run dev`
 3.  **Access:** Open `http://localhost:5173`
 
-   <img width="533" height="760" alt="image" src="https://github.com/user-attachments/assets/097de53c-bf17-4b59-941b-3b961961b3ca" />
 
-   <img width="1263" height="741" alt="image" src="https://github.com/user-attachments/assets/2fca6743-7d1b-4fb1-a33f-96e6d1464b4f" />
+   <img width="1150" height="686" alt="image" src="https://github.com/user-attachments/assets/01804344-84c2-4425-889b-53f280385ac7" />
 
 
-   <img width="533" height="760" alt="image" src="https://github.com/user-attachments/assets/097de53c-bf17-4b59-941b-3b961961b3ca" />
-
-   <img width="1263" height="741" alt="image" src="https://github.com/user-attachments/assets/2fca6743-7d1b-4fb1-a33f-96e6d1464b4f" />
+   <img width="1449" height="895" alt="image" src="https://github.com/user-attachments/assets/89ecf57b-f5d4-4db8-b1f7-25db6b0f0fb9" />
 
 
 ---
