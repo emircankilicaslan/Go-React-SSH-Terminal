@@ -38,9 +38,7 @@ var upgrader = websocket.Upgrader{
 func main() {
 	var err error
 	db, err = gorm.Open(sqlite.Open("fullstackx.db"), &gorm.Config{})
-	if err != nil {
-		log.Fatal(err)
-	}
+	if err != nil { log.Fatal(err) }
 	db.AutoMigrate(&User{}, &Connection{})
 	r := gin.Default()
 	r.Use(corsMiddleware())
@@ -107,26 +105,35 @@ func handleSSHWebSocket(c *gin.Context) {
 	ws, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil { return }
 	defer ws.Close()
+
 	config := &ssh.ClientConfig{
 		User:            conn.Username,
 		Auth:            []ssh.AuthMethod{ssh.Password(conn.Password)},
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 		Timeout:         15 * time.Second,
 	}
+
+	
 	addr := strings.TrimSpace(conn.Host) + ":" + strings.TrimSpace(conn.Port)
 	client, err := ssh.Dial("tcp", addr, config)
 	if err != nil {
-		ws.WriteMessage(websocket.TextMessage, []byte("\r\nBAĞLANTI HATASI: " + err.Error()))
+		
+		ws.WriteMessage(websocket.BinaryMessage, []byte("\r\n--- SSH HATASI: " + err.Error() + " ---\r\n"))
 		return
 	}
 	defer client.Close()
+
 	session, err := client.NewSession()
 	if err != nil { return }
 	defer session.Close()
+
 	stdin, _ := session.StdinPipe()
 	stdout, _ := session.StdoutPipe()
+
 	modes := ssh.TerminalModes{ssh.ECHO: 1, ssh.TTY_OP_ISPEED: 14400, ssh.TTY_OP_OSPEED: 14400}
 	session.RequestPty("xterm-256color", 40, 80, modes)
+
+	
 	go func() {
 		buf := make([]byte, 1024)
 		for {
@@ -135,6 +142,7 @@ func handleSSHWebSocket(c *gin.Context) {
 			ws.WriteMessage(websocket.BinaryMessage, buf[:n])
 		}
 	}()
+
 	go func() {
 		for {
 			_, msg, err := ws.ReadMessage()
@@ -142,6 +150,7 @@ func handleSSHWebSocket(c *gin.Context) {
 			stdin.Write(msg)
 		}
 	}()
+
 	session.Shell()
 	session.Wait()
 }
