@@ -1,4 +1,4 @@
-# 🚀 Go-React-SSH-Terminal
+#  Go-React-SSH-Terminal
 
 A secure, full-stack web-based SSH terminal client built with **Go (Golang)** and **React**.
 This project demonstrates a complete system architecture including JWT-based authentication, real-time WebSocket communication, and persistent server management via SQLite.
@@ -20,12 +20,19 @@ The application follows a modern full-stack architecture:
     * The system validates the credentials.
     * A WebSocket channel opens.
     * The terminal interface appears, connected directly to the remote server.
+  
+ 🤖 AI Development Process Summary
+This project was developed with the strategic assistance of Artificial Intelligence (Claude 4.5 Opus & Gemini) as a technical consultant and pair programmer, while the overall architecture and logic were manually controlled and refined by the developer.
 
-## 🤖 AI Development Process Summary
-This project was developed entirely with the assistance of Artificial Intelligence (**Claude 4.5 Opus** & **Gemini**) as a pair programmer, in accordance with the assignment requirements.
-* **Architecture Design:** AI was used to determine the optimal tech stack (Go + React) and database choice (SQLite) for the given requirements.
-* **Code Generation:** Core functionalities, including the WebSocket-SSH bridge and JWT authentication middleware, were generated iteratively with AI prompts.
-* **Debugging:** Error logs and connection issues were analyzed by AI to provide rapid solutions (e.g., resolving CGO dependencies for SQLite).
+Architecture & Strategy: AI was used to evaluate the most efficient tech stack for the requirements. The decision to use Go for the backend and xterm.js for the terminal was finalized through these consultations.
+
+Targeted Code Assistance: AI was utilized specifically for complex boilerplate sections, such as the initial setup of the WebSocket-SSH bridge and JWT middleware.
+
+Optimization & Debugging: During development, AI helped in analyzing specific error logs and optimizing real-time data streaming between the backend and frontend.
+
+Human-Led Development: All AI-generated suggestions were manually reviewed, debugged, and integrated into the final architecture by the developer to ensure system stability and security.
+
+
 
 ## 🛠️ Tech Stack
 | Component | Technology |
@@ -40,5 +47,9 @@ This project was developed entirely with the assistance of Artificial Intelligen
 2.  **Frontend:** `cd frontend` -> `npm run dev`
 3.  **Access:** Open `http://localhost:5173`
 
+   <img width="533" height="760" alt="image" src="https://github.com/user-attachments/assets/097de53c-bf17-4b59-941b-3b961961b3ca" />
+
+   <img width="1263" height="741" alt="image" src="https://github.com/user-attachments/assets/2fca6743-7d1b-4fb1-a33f-96e6d1464b4f" />
+
+
 ---
-*Developed as a Full Stack Technical Assignment*
