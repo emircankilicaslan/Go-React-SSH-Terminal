@@ -14,9 +14,13 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/crypto/ssh"
+	"golang.org/x/time/rate"
 	"gorm.io/gorm"
 )
+
+func init() { bcryptCost = bcrypt.MinCost } // testler hızlı çalışsın
 
 func testConfig() Config {
 	return Config{
@@ -105,7 +109,8 @@ func TestLoginWrongPasswordAndUnknownUser(t *testing.T) {
 }
 
 func TestLoginRateLimited(t *testing.T) {
-	_, r, _ := newTestApp(t)
+	app, r, _ := newTestApp(t)
+	app.limiter = &loginLimiter{byIP: map[string]*rate.Limiter{}, limit: 0, burst: 10} // yenilenme yok: zamandan bağımsız test
 	var last int
 	for i := 0; i < 12; i++ {
 		last = do(r, "POST", "/login", "", map[string]string{"email": "x@y.zz", "password": "nope-nope-1"}).Code

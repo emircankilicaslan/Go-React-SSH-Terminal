@@ -16,9 +16,11 @@ import (
 
 const (
 	tokenTTL      = 12 * time.Hour
-	bcryptCost    = 12
 	maxPasswordLn = 72 // bcrypt sınırı
 )
+
+// bcryptCost testlerde düşürülebilsin diye değişkendir.
+var bcryptCost = 12
 
 type credentials struct {
 	Email    string `json:"email"`
