@@ -1,93 +1,95 @@
-# Go-React-SSH-Terminal
+# Go-React-SSH-Terminal – Tarayıcıdan SSH Terminali
 
 ![CI](https://github.com/emircankilicaslan/Go-React-SSH-Terminal/actions/workflows/ci.yml/badge.svg)
 
-A web-based SSH terminal client built with **Go** and **React**. Users sign up, save servers, and open real SSH sessions in the browser through a WebSocket bridge (xterm.js).
+> **English summary:** A web-based SSH terminal built with Go (Gin) and React (xterm.js). Users sign up, save servers and open real SSH sessions in the browser over a WebSocket bridge. Security highlights: JWT auth, AES-256-GCM encrypted stored passwords, single-use WebSocket tickets, trust-on-first-use host key pinning. 14 backend tests, CI on GitHub Actions.
 
-## Security model
+**Go** ve **React** ile geliştirilmiş, web tabanlı bir SSH terminal istemcisi. Kullanıcılar kayıt olur, sunucularını kaydeder ve tarayıcıda WebSocket köprüsü (xterm.js) üzerinden gerçek SSH oturumları açar.
 
-| Concern | How it is handled |
+## Güvenlik modeli
+
+| Konu | Nasıl ele alınıyor |
 |---|---|
-| Authentication | JWT (HS256, 12 h expiry, algorithm pinned); all server endpoints require `Authorization: Bearer <token>` |
-| Passwords | bcrypt (cost 12), 8–72 characters, constant-work login (no account enumeration by timing) |
-| Brute force | Per-IP rate limit on `/login` (10 / minute) |
-| Stored SSH passwords | Encrypted with **AES-256-GCM**; never returned by the API; key comes from `ENCRYPTION_KEY` |
-| Authorization (IDOR) | Every connection query is scoped to the token's user; other users get `404` |
-| WebSocket auth | Token is never put in a URL. The client requests a **single-use, 30 s ticket** (`POST /connections/:id/ticket`) and connects to `/ws/:ticket` |
-| Host key verification | **Trust on first use**: the server fingerprint is pinned on first connect and a changed key (possible MITM) is rejected |
-| CORS / WebSocket origin | Allow-list from `ALLOWED_ORIGINS`; no wildcard |
-| Secrets | Read from environment variables only; the repo contains none (`.env`, `*.db` are git-ignored) |
+| Kimlik doğrulama | JWT (HS256, 12 saat geçerlilik, algoritma sabitlenmiş); tüm sunucu uç noktaları `Authorization: Bearer <token>` ister |
+| Parolalar | bcrypt (maliyet 12), 8–72 karakter, sabit işlem süreli giriş (zamanlamayla hesap varlığı tespit edilemez) |
+| Kaba kuvvet | `/login` üzerinde IP başına hız sınırı (dakikada 10) |
+| Saklanan SSH parolaları | **AES-256-GCM** ile şifrelenir; API'den asla döndürülmez; anahtar `ENCRYPTION_KEY`'den gelir |
+| Yetkilendirme (IDOR) | Her bağlantı sorgusu token sahibi kullanıcıyla sınırlıdır; başkaları `404` alır |
+| WebSocket kimlik doğrulaması | Token hiçbir zaman URL'ye konmaz. İstemci **tek kullanımlık, 30 sn'lik bir bilet** (`POST /connections/:id/ticket`) alır ve `/ws/:ticket` adresine bağlanır |
+| Sunucu anahtarı doğrulama | **İlk kullanımda güven (TOFU):** sunucu parmak izi ilk bağlantıda sabitlenir, değişen anahtar (olası MITM) reddedilir |
+| CORS / WebSocket origin | `ALLOWED_ORIGINS` izin listesi; joker (`*`) yok |
+| Gizli bilgiler | Yalnızca ortam değişkenlerinden okunur; repoda gizli bilgi yoktur (`.env`, `*.db` git'e eklenmez) |
 
-Known limits (by design for a demo-scale project): the app connects to any host a user enters, so deploy it where outbound access is restricted (it can be used to reach internal hosts, i.e. SSRF-like exposure); the rate limiter and tickets are in-memory (single instance); there is no token revocation before expiry.
+Bilinen sınırlar (demo ölçekli bir proje için bilerek bırakıldı): Uygulama kullanıcının girdiği herhangi bir sunucuya bağlanır, bu yüzden dışarı erişimin kısıtlandığı bir ortamda çalıştırılmalıdır (iç ağdaki sunuculara ulaşmak için kullanılabilir, yani SSRF benzeri bir risk taşır); hız sınırlayıcı ve biletler bellektedir (tek örnek); süre dolmadan token iptali yoktur.
 
-## Architecture
+## Mimari
 
 ```
 React + Vite + xterm.js  ──HTTP/JSON──▶  Go (Gin)  ──GORM──▶  SQLite
         │                                   │
-        └── WebSocket (ticket) ─────────────┴──▶ golang.org/x/crypto/ssh ──▶ remote server
+        └── WebSocket (bilet) ──────────────┴──▶ golang.org/x/crypto/ssh ──▶ uzak sunucu
 ```
 
-| File | Responsibility |
+| Dosya | Sorumluluk |
 |---|---|
-| `backend/main.go` | Wiring, routes, CORS, server start |
-| `backend/config.go` | Environment configuration and validation |
-| `backend/auth.go` | Register/login, JWT, auth middleware, login rate limiter |
-| `backend/connections.go` | Server CRUD (user-scoped), input validation, WebSocket tickets |
-| `backend/crypto.go` | AES-256-GCM helpers |
-| `backend/ssh.go` | WebSocket ⇄ SSH bridge, host-key pinning |
-| `backend/app_test.go` | 14 tests (auth, IDOR, encryption, tickets, CORS, host keys, config) |
-| `frontend/src` | React UI (`App.jsx`, `TerminalComponent.jsx`, `api.js`) |
+| `backend/main.go` | Bağlantı kurulumu, rotalar, CORS, sunucu başlatma |
+| `backend/config.go` | Ortam yapılandırması ve doğrulama |
+| `backend/auth.go` | Kayıt/giriş, JWT, kimlik doğrulama ara katmanı, giriş hız sınırlayıcı |
+| `backend/connections.go` | Sunucu CRUD (kullanıcıya özel), girdi doğrulama, WebSocket biletleri |
+| `backend/crypto.go` | AES-256-GCM yardımcıları |
+| `backend/ssh.go` | WebSocket ⇄ SSH köprüsü, sunucu anahtarı sabitleme |
+| `backend/app_test.go` | 14 test (kimlik doğrulama, IDOR, şifreleme, biletler, CORS, sunucu anahtarları, yapılandırma) |
+| `frontend/src` | React arayüzü (`App.jsx`, `TerminalComponent.jsx`, `api.js`) |
 
 ## API
 
-| Method | Path | Auth | Description |
+| Yöntem | Yol | Kimlik | Açıklama |
 |---|---|---|---|
-| GET | `/health` | – | Health check |
-| POST | `/register` | – | Create account |
-| POST | `/login` | – | Returns `{ token, user_id, email }` |
-| GET | `/connections` | Bearer | List my servers |
-| POST | `/connections` | Bearer | Add a server (`name, host, port, username, password`) |
-| DELETE | `/connections/:id` | Bearer | Delete one of my servers |
-| POST | `/connections/:id/ticket` | Bearer | Single-use WebSocket ticket |
-| GET | `/ws/:ticket` | ticket | SSH session over WebSocket |
+| GET | `/health` | – | Sağlık kontrolü |
+| POST | `/register` | – | Hesap oluştur |
+| POST | `/login` | – | `{ token, user_id, email }` döndürür |
+| GET | `/connections` | Bearer | Sunucularımı listele |
+| POST | `/connections` | Bearer | Sunucu ekle (`name, host, port, username, password`) |
+| DELETE | `/connections/:id` | Bearer | Sunucularımdan birini sil |
+| POST | `/connections/:id/ticket` | Bearer | Tek kullanımlık WebSocket bileti |
+| GET | `/ws/:ticket` | bilet | WebSocket üzerinden SSH oturumu |
 
-## Running locally
+## Yerelde çalıştırma
 
 ```bash
 cp .env.example .env
-# fill JWT_SECRET (openssl rand -base64 48) and ENCRYPTION_KEY (openssl rand -base64 32)
+# JWT_SECRET (openssl rand -base64 48) ve ENCRYPTION_KEY (openssl rand -base64 32) değerlerini doldurun
 
-# Backend
+# Arka uç
 cd backend
-export $(grep -v '^#' ../.env | xargs)   # or set the variables in your shell
+export $(grep -v '^#' ../.env | xargs)   # veya değişkenleri kabuğunuzda tanımlayın
 go run .
 
-# Frontend (another terminal)
+# Ön yüz (başka bir terminalde)
 cd frontend
 npm install
 npm run dev        # http://localhost:5173
 ```
 
-Or with Docker: `docker compose up --build` (backend on `:8080`).
+Ya da Docker ile: `docker compose up --build` (arka uç `:8080` portunda).
 
-The frontend reads `VITE_API_URL` (default: same host, port 8080).
+Ön yüz `VITE_API_URL` değişkenini okur (varsayılan: aynı sunucu, 8080 portu).
 
-## Tests and CI
+## Test ve CI
 
 ```bash
 cd backend && go vet ./... && go test -race ./...
 cd frontend && npm run lint && npm run build
 ```
 
-GitHub Actions runs formatting, vet, race-enabled tests, lint and the production build on every push and pull request.
+GitHub Actions her push ve pull request'te biçim denetimini, `go vet`'i, yarış dedektörlü testleri, lint'i ve üretim derlemesini çalıştırır.
 
-## Screenshots
+## Ekran Görüntüleri
 
-Running locally with a real SSH server as the target (Go backend + React frontend):
+Hedef olarak gerçek bir SSH sunucusuyla yerelde çalışan uygulama (Go arka uç + React ön yüz):
 
-![Login](docs/screenshots/giris.jpg)
+![Giriş](docs/screenshots/giris.jpg)
 
-![Server list](docs/screenshots/sunucu-listesi.jpg)
+![Sunucu listesi](docs/screenshots/sunucu-listesi.jpg)
 
-![SSH session in the browser](docs/screenshots/terminal.jpg)
+![Tarayıcıda SSH oturumu](docs/screenshots/terminal.jpg)
