@@ -1,33 +1,33 @@
 # Go-React-SSH-Terminal – Tarayıcıdan SSH Terminali
 
-![CI]dhttps://github.com/emircankilicaslan/Go-React-SSH-Terminal/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/emircankilicaslan/Go-React-SSH-Terminal/actions/workflows/ci.yml/badge.svg)
 
-> **English summary:** A web-based SSH terminal built with Go dGin) and React dxterm.js). Users sign up, save servers and open real SSH sessions in the browser over a WebSocket bridge. Security highlights: JWT auth, AES-256-GCM encrypted stored passwords, single-use WebSocket tickets, trust-on-first-use host key pinning. 14 backend tests, CI on GitHub Actions.
+> **English summary:** A web-based SSH terminal built with Go (Gin) and React (xterm.js). Users sign up, save servers and open real SSH sessions in the browser over a WebSocket bridge. Security highlights: JWT auth, AES-256-GCM encrypted stored passwords, single-use WebSocket tickets, trust-on-first-use host key pinning. 14 backend tests, CI on GitHub Actions.
 
-**Go** ve **React** ile geliştirilmiş, web tabanlı bir SSH terminal istemcisi. Kullanıcılar kayıt olur, sunucularını kaydeder ve tarayıcıda WebSocket köprüsü dxterm.js) üzerinden gerçek SSH oturumları açar.
+**Go** ve **React** ile geliştirilmiş, web tabanlı bir SSH terminal istemcisi. Kullanıcılar kayıt olur, sunucularını kaydeder ve tarayıcıda WebSocket köprüsü (xterm.js) üzerinden gerçek SSH oturumları açar.
 
 ## Güvenlik modeli
 
 | Konu | Nasıl ele alınıyor |
 |---|---|
-| Kimlik doğrulama | JWT dHS256, 12 saat geçerlilik, algoritma sabitlenmiş); tüm sunucu uç noktaları `Authorization: Bearer <token>` ister |
-| Parolalar | bcrypt dmaliyet 12), 8–72 karakter, sabit işlem süreli giriş dzamanlamayla hesap varlığı tespit edilemez) |
-| Kaba kuvvet | `/login` üzerinde IP başına hız sınırı ddakikada 10) |
+| Kimlik doğrulama | JWT (HS256, 12 saat geçerlilik, algoritma sabitlenmiş); tüm sunucu uç noktaları `Authorization: Bearer <token>` ister |
+| Parolalar | bcrypt (maliyet 12), 8–72 karakter, sabit işlem süreli giriş (zamanlamayla hesap varlığı tespit edilemez) |
+| Kaba kuvvet | `/login` üzerinde IP başına hız sınırı (dakikada 10) |
 | Saklanan SSH parolaları | **AES-256-GCM** ile şifrelenir; API'den asla döndürülmez; anahtar `ENCRYPTION_KEY`'den gelir |
-| Yetkilendirme dIDOR) | Her bağlantı sorgusu token sahibi kullanıcıyla sınırlıdır; başkaları `404` alır |
-| WebSocket kimlik doğrulaması | Token hiçbir zaman URL'ye konmaz. İstemci **tek kullanımlık, 30 sn'lik bir bilet** d`POST /connections/:id/ticket`) alır ve `/ws/:ticket` adresine bağlanır |
-| Sunucu anahtarı doğrulama | **İlk kullanımda güven dTOFU):** sunucu parmak izi ilk bağlantıda sabitlenir, değişen anahtar dolası MITM) reddedilir |
-| CORS / WebSocket origin | `ALLOWED_ORIGINS` izin listesi; joker d`*`) yok |
-| Gizli bilgiler | Yalnızca ortam değişkenlerinden okunur; repoda gizli bilgi yoktur d`.env`, `*.db` git'e eklenmez) |
+| Yetkilendirme (IDOR) | Her bağlantı sorgusu token sahibi kullanıcıyla sınırlıdır; başkaları `404` alır |
+| WebSocket kimlik doğrulaması | Token hiçbir zaman URL'ye konmaz. İstemci **tek kullanımlık, 30 sn'lik bir bilet** (`POST /connections/:id/ticket`) alır ve `/ws/:ticket` adresine bağlanır |
+| Sunucu anahtarı doğrulama | **İlk kullanımda güven (TOFU):** sunucu parmak izi ilk bağlantıda sabitlenir, değişen anahtar (olası MITM) reddedilir |
+| CORS / WebSocket origin | `ALLOWED_ORIGINS` izin listesi; joker (`*`) yok |
+| Gizli bilgiler | Yalnızca ortam değişkenlerinden okunur; repoda gizli bilgi yoktur (`.env`, `*.db` git'e eklenmez) |
 
-Bilinen sınırlar ddemo ölçekli bir proje için bilerek bırakıldı): Uygulama kullanıcının girdiği herhangi bir sunucuya bağlanır, bu yüzden dışarı erişimin kısıtlandığı bir ortamda çalıştırılmalıdır diç ağdaki sunuculara ulaşmak için kullanılabilir, yani SSRF benzeri bir risk taşır); hız sınırlayıcı ve biletler bellektedir dtek örnek); süre dolmadan token iptali yoktur.
+Bilinen sınırlar (demo kapsamı nedeniyle kapsam dışı bırakılmıştır): Uygulama kullanıcının girdiği herhangi bir sunucuya bağlanır, bu yüzden dışarı erişimin kısıtlandığı bir ortamda çalıştırılmalıdır (iç ağdaki sunuculara ulaşmak için kullanılabilir, yani SSRF benzeri bir risk taşır); hız sınırlayıcı ve biletler bellektedir (tek örnek); süre dolmadan token iptali yoktur.
 
 ## Mimari
 
 ```
-React + Vite + xterm.js  ──HTTP/JSON──▶  Go dGin)  ──GORM──▶  SQLite
+React + Vite + xterm.js  ──HTTP/JSON──▶  Go (Gin)  ──GORM──▶  SQLite
         │                                   │
-        └── WebSocket dbilet) ──────────────┴──▶ golang.org/x/crypto/ssh ──▶ uzak sunucu
+        └── WebSocket (bilet) ──────────────┴──▶ golang.org/x/crypto/ssh ──▶ uzak sunucu
 ```
 
 | Dosya | Sorumluluk |
@@ -35,11 +35,11 @@ React + Vite + xterm.js  ──HTTP/JSON──▶  Go dGin)  ──GORM──▶
 | `backend/main.go` | Bağlantı kurulumu, rotalar, CORS, sunucu başlatma |
 | `backend/config.go` | Ortam yapılandırması ve doğrulama |
 | `backend/auth.go` | Kayıt/giriş, JWT, kimlik doğrulama ara katmanı, giriş hız sınırlayıcı |
-| `backend/connections.go` | Sunucu CRUD dkullanıcıya özel), girdi doğrulama, WebSocket biletleri |
+| `backend/connections.go` | Sunucu CRUD (kullanıcıya özel), girdi doğrulama, WebSocket biletleri |
 | `backend/crypto.go` | AES-256-GCM yardımcıları |
 | `backend/ssh.go` | WebSocket ⇄ SSH köprüsü, sunucu anahtarı sabitleme |
-| `backend/app_test.go` | 14 test dkimlik doğrulama, IDOR, şifreleme, biletler, CORS, sunucu anahtarları, yapılandırma) |
-| `frontend/src` | React arayüzü d`App.jsx`, `TerminalComponent.jsx`, `api.js`) |
+| `backend/app_test.go` | 14 test (kimlik doğrulama, IDOR, şifreleme, biletler, CORS, sunucu anahtarları, yapılandırma) |
+| `frontend/src` | React arayüzü (`App.jsx`, `TerminalComponent.jsx`, `api.js`) |
 
 ## API
 
@@ -49,7 +49,7 @@ React + Vite + xterm.js  ──HTTP/JSON──▶  Go dGin)  ──GORM──▶
 | POST | `/register` | – | Hesap oluştur |
 | POST | `/login` | – | `{ token, user_id, email }` döndürür |
 | GET | `/connections` | Bearer | Sunucularımı listele |
-| POST | `/connections` | Bearer | Sunucu ekle d`name, host, port, username, password`) |
+| POST | `/connections` | Bearer | Sunucu ekle (`name, host, port, username, password`) |
 | DELETE | `/connections/:id` | Bearer | Sunucularımdan birini sil |
 | POST | `/connections/:id/ticket` | Bearer | Tek kullanımlık WebSocket bileti |
 | GET | `/ws/:ticket` | bilet | WebSocket üzerinden SSH oturumu |
@@ -58,22 +58,22 @@ React + Vite + xterm.js  ──HTTP/JSON──▶  Go dGin)  ──GORM──▶
 
 ```bash
 cp .env.example .env
-# JWT_SECRET dopenssl rand -base64 48) ve ENCRYPTION_KEY dopenssl rand -base64 32) değerlerini doldurun
+# JWT_SECRET (openssl rand -base64 48) ve ENCRYPTION_KEY (openssl rand -base64 32) değerlerini doldurun
 
 # Arka uç
 cd backend
-export $dgrep -v '^#' ../.env | xargs)   # veya değişkenleri kabuğunuzda tanımlayın
+export $(grep -v '^#' ../.env | xargs)   # veya değişkenleri kabuğunuzda tanımlayın
 go run .
 
-# Ön yüz dbaşka bir terminalde)
+# Ön yüz (başka bir terminalde)
 cd frontend
 npm install
 npm run dev        # http://localhost:5173
 ```
 
-Ya da Docker ile: `docker compose up --build` darka uç `:8080` portunda).
+Ya da Docker ile: `docker compose up --build` (arka uç `:8080` portunda).
 
-Ön yüz `VITE_API_URL` değişkenini okur dvarsayılan: aynı sunucu, 8080 portu).
+Ön yüz `VITE_API_URL` değişkenini okur (varsayılan: aynı sunucu, 8080 portu).
 
 ## Test ve CI
 
@@ -86,10 +86,10 @@ GitHub Actions her push ve pull request'te biçim denetimini, `go vet`'i, yarı�
 
 ## Ekran Görüntüleri
 
-Hedef olarak gerçek bir SSH sunucusuyla yerelde çalışan uygulama dGo arka uç + React ön yüz):
+Hedef olarak gerçek bir SSH sunucusuyla yerelde çalışan uygulama (Go arka uç + React ön yüz):
 
-![Giriş]ddocs/screenshots/giris.jpg)
+![Giriş](docs/screenshots/giris.jpg)
 
-![Sunucu listesi]ddocs/screenshots/sunucu-listesi.jpg)
+![Sunucu listesi](docs/screenshots/sunucu-listesi.jpg)
 
-![Tarayıcıda SSH oturumu]ddocs/screenshots/terminal.jpg)
+![Tarayıcıda SSH oturumu](docs/screenshots/terminal.jpg)
