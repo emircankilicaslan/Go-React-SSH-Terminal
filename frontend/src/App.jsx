@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import TerminalComponent from './TerminalComponent'
+import { request } from './api'
 import './App.css'
 
 function App() {
@@ -7,75 +8,77 @@ function App() {
   const [isRegister, setIsRegister] = useState(false)
   const [authData, setAuthData] = useState({ email: '', password: '' })
   const [connections, setConnections] = useState([])
-  const [activeSessionId, setActiveSessionId] = useState(null)
+  const [activeSession, setActiveSession] = useState(null)
   const [serverForm, setServerForm] = useState({ name: '', host: '', port: '22', username: '', password: '' })
 
-  const API_BASE = `http://${window.location.hostname}:8080`;
-
-  useEffect(() => {
-    if (user) fetchConnections()
-  }, [user])
+  const logout = useCallback(() => {
+    setUser(null)
+    setConnections([])
+    setActiveSession(null)
+  }, [])
 
   const handleAuth = async (e) => {
     e.preventDefault()
-    const endpoint = isRegister ? '/register' : '/login'
     try {
-      const res = await fetch(`${API_BASE}${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(authData)
-      })
-      const data = await res.json()
-      
-      if (!res.ok) {
-        alert(data.error)
+      if (isRegister) {
+        await request('/register', { method: 'POST', body: authData })
+        alert('Kayıt başarılı! Şimdi giriş yapın.')
+        setIsRegister(false)
       } else {
-        if (isRegister) {
-          alert("Kayıt Başarılı! Şimdi giriş yapın.")
-          setIsRegister(false)
-        } else {
-          setUser(data)
-        }
+        setUser(await request('/login', { method: 'POST', body: authData }))
       }
-    } catch (err) { alert("Bağlantı Hatası: Backend servisinin çalıştığından emin olun.") }
+    } catch (err) { alert(err.message === 'Failed to fetch' ? 'Bağlantı hatası: backend servisinin çalıştığından emin olun.' : err.message) }
   }
 
-  const fetchConnections = async () => {
-    try {
-      const res = await fetch(`${API_BASE}/connections?user_id=${user.user_id}`)
-      setConnections(await res.json())
-    } catch (err) { console.error("Veri çekme hatası:", err) }
-  }
+  // Liste, kullanıcı değiştiğinde veya refresh() çağrıldığında yeniden yüklenir.
+  const [reloadKey, setReloadKey] = useState(0)
+  const fetchConnections = () => setReloadKey(n => n + 1)
+
+  useEffect(() => {
+    if (!user) return
+    let cancelled = false
+    request('/connections', { token: user.token, onUnauthorized: logout })
+      .then(list => { if (!cancelled) setConnections(list) })
+      .catch(err => console.error('Veri çekme hatası:', err))
+    return () => { cancelled = true }
+  }, [user, logout, reloadKey])
 
   const addServer = async (e) => {
     e.preventDefault()
-    const payload = { ...serverForm, user_id: user.user_id }
-    await fetch(`${API_BASE}/connections`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    })
-    setServerForm({ name: '', host: '', port: '22', username: '', password: '' })
-    fetchConnections()
+    try {
+      await request('/connections', { token: user.token, method: 'POST', body: serverForm, onUnauthorized: logout })
+      setServerForm({ name: '', host: '', port: '22', username: '', password: '' })
+      fetchConnections()
+    } catch (err) { alert(err.message) }
   }
 
   const deleteServer = async (id) => {
-    await fetch(`${API_BASE}/connections/${id}`, { method: 'DELETE' })
-    fetchConnections()
+    try {
+      await request(`/connections/${id}`, { token: user.token, method: 'DELETE', onUnauthorized: logout })
+      fetchConnections()
+    } catch (err) { alert(err.message) }
   }
 
-  if (activeSessionId) {
+  // Terminal oturumu için kısa ömürlü, tek kullanımlık bilet alınır (token URL'ye konmaz).
+  const connect = async (c) => {
+    try {
+      const { ticket } = await request(`/connections/${c.id}/ticket`, { token: user.token, method: 'POST', onUnauthorized: logout })
+      setActiveSession({ ticket, name: c.name })
+    } catch (err) { alert(err.message) }
+  }
+
+  if (activeSession) {
     return (
       <div className="terminal-overlay">
         <div className="terminal-header">
           <div className="status-indicator">
             <span className="dot"></span>
-            <span>SSH Session: {activeSessionId}</span>
+            <span>SSH Oturumu: {activeSession.name}</span>
           </div>
-          <button className="close-btn" onClick={() => setActiveSessionId(null)}>Oturumu Kapat ×</button>
+          <button className="close-btn" onClick={() => setActiveSession(null)}>Oturumu Kapat ×</button>
         </div>
         <div className="terminal-container">
-          <TerminalComponent sessionId={activeSessionId} />
+          <TerminalComponent ticket={activeSession.ticket} />
         </div>
       </div>
     )
@@ -118,7 +121,7 @@ function App() {
         </div>
         <div className="user-nav">
           <span className="user-badge">👤 {user.email}</span>
-          <button onClick={() => setUser(null)} className="logout-btn">Çıkış</button>
+          <button onClick={logout} className="logout-btn">Çıkış</button>
         </div>
       </header>
 
@@ -148,7 +151,7 @@ function App() {
                     <code>{c.username}@{c.host}:{c.port}</code>
                   </div>
                   <div className="server-actions">
-                    <button onClick={() => setActiveSessionId(c.id)} className="term-btn">Bağlan</button>
+                    <button onClick={() => connect(c)} className="term-btn">Bağlan</button>
                     <button onClick={() => deleteServer(c.id)} className="del-btn">Sil</button>
                   </div>
                 </div>

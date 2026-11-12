@@ -1,0 +1,13 @@
+# Gizli değerler ve yerel veriler repoya girmemeli
+.env
+*.env.local
+*.db
+*.db-shm
+*.db-wal
+backend/data/
+
+# Derleme çıktıları
+node_modules/
+dist/
+backend/ssh-terminal
+*.exe

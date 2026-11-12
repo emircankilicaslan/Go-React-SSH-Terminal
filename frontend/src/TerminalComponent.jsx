@@ -2,8 +2,9 @@ import React, { useEffect, useRef } from 'react';
 import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
 import 'xterm/css/xterm.css';
+import { WS_BASE } from './api';
 
-const TerminalComponent = ({ sessionId }) => {
+const TerminalComponent = ({ ticket }) => {
     const terminalRef = useRef(null);
     const socketRef = useRef(null);
     const xtermRef = useRef(null);
@@ -28,14 +29,12 @@ const TerminalComponent = ({ sessionId }) => {
 
         term.write('\x1b[33mBağlantı kuruluyor...\x1b[0m\r\n');
 
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const host = window.location.hostname;
-        const socket = new WebSocket(`${protocol}//${host}:8080/ws/${sessionId}`);
+        const socket = new WebSocket(`${WS_BASE}/ws/${ticket}`);
         socket.binaryType = "arraybuffer";
         socketRef.current = socket;
 
         socket.onopen = () => {
-            term.write('\r\n\x1b[32m--- GÜVENLİ BAĞLANTI SAĞLANDI ---\x1b[0m\r\n\r\n');
+            term.write('\r\n\x1b[32m--- WEBSOCKET BAĞLANTISI KURULDU ---\x1b[0m\r\n\r\n');
         };
 
         socket.onmessage = (event) => {
@@ -65,7 +64,7 @@ const TerminalComponent = ({ sessionId }) => {
             socket.close();
             term.dispose();
         };
-    }, [sessionId]);
+    }, [ticket]);
 
     return (
         <div style={{ padding: '15px', background: '#000', borderRadius: '12px', border: '1px solid #334155' }}>

@@ -1,0 +1,12 @@
+services:
+  backend:
+    build: ./backend
+    env_file: .env
+    environment:
+      DB_PATH: /data/fullstackx.db
+    ports:
+      - "8080:8080"
+    volumes:
+      - ssh-terminal-data:/data
+volumes:
+  ssh-terminal-data:

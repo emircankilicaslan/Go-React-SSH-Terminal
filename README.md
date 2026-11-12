@@ -1,47 +1,89 @@
+# Go-React-SSH-Terminal
 
-#  Go-React-SSH-Terminal
+![CI](https://github.com/emircankilicaslan/Go-React-SSH-Terminal/actions/workflows/ci.yml/badge.svg)
 
-A secure, full-stack web-based SSH terminal client built with **Go (Golang)** and **React**.
-This project demonstrates a complete system architecture including JWT-based authentication, real-time WebSocket communication, and persistent server management via SQLite.
+A web-based SSH terminal client built with **Go** and **React**. Users sign up, save servers, and open real SSH sessions in the browser through a WebSocket bridge (xterm.js).
 
-## 🏗️ Architecture Summary
-The application follows a modern full-stack architecture:
-* **Frontend:** Built with **React** and **Vite**. It uses `xterm.js` to render a real-time terminal interface in the browser.
-* **Backend:** Developed with **Go (Golang)** using the `Gin` framework. It handles HTTP requests for authentication and manages WebSocket upgrades for SSH sessions.
-* **Data Flow:**
-    1.  User credentials are authenticated via a REST API (stored securely in **SQLite**).
-    2.  SSH connection details are retrieved from the database.
-    3.  A **WebSocket** connection is established between the frontend and backend.
-    4.  The backend establishes a **real TCP SSH connection** to the remote server and pipes the `stdin/stdout` streams directly to the WebSocket, providing a live terminal experience.
+## Security model
 
-## 🔌 How to Establish SSH Connection
-1.  **Register/Login:** Create an account to access the dashboard.
-2.  **Add Server:** Enter the **Host IP**, **Port** (usually 22), **Username**, and **Password** of the target Linux server.
-3.  **Connect:** Click the **"Connect"** button next to the saved server.
-    * The system validates the credentials.
-    * A WebSocket channel opens.
-    * The terminal interface appears, connected directly to the remote server.
+| Concern | How it is handled |
+|---|---|
+| Authentication | JWT (HS256, 12 h expiry, algorithm pinned); all server endpoints require `Authorization: Bearer <token>` |
+| Passwords | bcrypt (cost 12), 8–72 characters, constant-work login (no account enumeration by timing) |
+| Brute force | Per-IP rate limit on `/login` (10 / minute) |
+| Stored SSH passwords | Encrypted with **AES-256-GCM**; never returned by the API; key comes from `ENCRYPTION_KEY` |
+| Authorization (IDOR) | Every connection query is scoped to the token's user; other users get `404` |
+| WebSocket auth | Token is never put in a URL. The client requests a **single-use, 30 s ticket** (`POST /connections/:id/ticket`) and connects to `/ws/:ticket` |
+| Host key verification | **Trust on first use**: the server fingerprint is pinned on first connect and a changed key (possible MITM) is rejected |
+| CORS / WebSocket origin | Allow-list from `ALLOWED_ORIGINS`; no wildcard |
+| Secrets | Read from environment variables only; the repo contains none (`.env`, `*.db` are git-ignored) |
 
+Known limits (by design for a demo-scale project): the app connects to any host a user enters, so deploy it where outbound access is restricted (it can be used to reach internal hosts, i.e. SSRF-like exposure); the rate limiter and tickets are in-memory (single instance); there is no token revocation before expiry.
 
-## 🛠️ Tech Stack
-| Component | Technology |
-|-----------|------------|
-| **Backend** | Go (1.23), Gin, Gorilla WebSocket, GORM |
-| **Frontend** | React.js, Vite, xterm.js |
-| **Database** | SQLite (Embedded) |
-| **Auth** | JWT & Bcrypt |
+## Architecture
 
-## 🚀 How to Run
-1.  **Backend:** `cd backend` -> `go run main.go`
-2.  **Frontend:** `cd frontend` -> `npm run dev`
-3.  **Access:** Open `http://localhost:5173`
+```
+React + Vite + xterm.js  ──HTTP/JSON──▶  Go (Gin)  ──GORM──▶  SQLite
+        │                                   │
+        └── WebSocket (ticket) ─────────────┴──▶ golang.org/x/crypto/ssh ──▶ remote server
+```
 
+| File | Responsibility |
+|---|---|
+| `backend/main.go` | Wiring, routes, CORS, server start |
+| `backend/config.go` | Environment configuration and validation |
+| `backend/auth.go` | Register/login, JWT, auth middleware, login rate limiter |
+| `backend/connections.go` | Server CRUD (user-scoped), input validation, WebSocket tickets |
+| `backend/crypto.go` | AES-256-GCM helpers |
+| `backend/ssh.go` | WebSocket ⇄ SSH bridge, host-key pinning |
+| `backend/app_test.go` | 14 tests (auth, IDOR, encryption, tickets, CORS, host keys, config) |
+| `frontend/src` | React UI (`App.jsx`, `TerminalComponent.jsx`, `api.js`) |
+
+## API
+
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| GET | `/health` | – | Health check |
+| POST | `/register` | – | Create account |
+| POST | `/login` | – | Returns `{ token, user_id, email }` |
+| GET | `/connections` | Bearer | List my servers |
+| POST | `/connections` | Bearer | Add a server (`name, host, port, username, password`) |
+| DELETE | `/connections/:id` | Bearer | Delete one of my servers |
+| POST | `/connections/:id/ticket` | Bearer | Single-use WebSocket ticket |
+| GET | `/ws/:ticket` | ticket | SSH session over WebSocket |
+
+## Running locally
+
+```bash
+cp .env.example .env
+# fill JWT_SECRET (openssl rand -base64 48) and ENCRYPTION_KEY (openssl rand -base64 32)
+
+# Backend
+cd backend
+export $(grep -v '^#' ../.env | xargs)   # or set the variables in your shell
+go run .
+
+# Frontend (another terminal)
+cd frontend
+npm install
+npm run dev        # http://localhost:5173
+```
+
+Or with Docker: `docker compose up --build` (backend on `:8080`).
+
+The frontend reads `VITE_API_URL` (default: same host, port 8080).
+
+## Tests and CI
+
+```bash
+cd backend && go vet ./... && go test -race ./...
+cd frontend && npm run lint && npm run build
+```
+
+GitHub Actions runs formatting, vet, race-enabled tests, lint and the production build on every push and pull request.
+
+## Screenshots
 
    <img width="1150" height="686" alt="image" src="https://github.com/user-attachments/assets/01804344-84c2-4425-889b-53f280385ac7" />
 
-
    <img width="1449" height="895" alt="image" src="https://github.com/user-attachments/assets/89ecf57b-f5d4-4db8-b1f7-25db6b0f0fb9" />
-
-
----
-
