@@ -59,13 +59,8 @@ function App() {
     } catch (err) { alert(err.message) }
   }
 
-  // Terminal oturumu için kısa ömürlü, tek kullanımlık bilet alınır (token URL'ye konmaz).
-  const connect = async (c) => {
-    try {
-      const { ticket } = await request(`/connections/${c.id}/ticket`, { token: user.token, method: 'POST', onUnauthorized: logout })
-      setActiveSession({ ticket, name: c.name })
-    } catch (err) { alert(err.message) }
-  }
+  // Terminal oturumu: tek kullanımlık WebSocket bileti TerminalComponent içinde, bağlanırken alınır.
+  const connect = (c) => setActiveSession({ id: c.id, name: c.name })
 
   if (activeSession) {
     return (
@@ -78,7 +73,7 @@ function App() {
           <button className="close-btn" onClick={() => setActiveSession(null)}>Oturumu Kapat ×</button>
         </div>
         <div className="terminal-container">
-          <TerminalComponent ticket={activeSession.ticket} />
+          <TerminalComponent connectionId={activeSession.id} token={user.token} onUnauthorized={logout} />
         </div>
       </div>
     )
@@ -99,11 +94,6 @@ function App() {
             <button type="submit" className="primary-btn">{isRegister ? 'Kayıt Ol' : 'Giriş Yap'}</button>
           </form>
           
-          <div className="divider"><span>veya</span></div>
-
-          <button className="github-btn" onClick={() => alert("GitHub entegrasyonu yakında eklenecek.")}>
-            <span className="icon">GitHub</span> ile devam et (Yakında)
-          </button>
 
           <p className="toggle-auth" onClick={() => setIsRegister(!isRegister)}>
             {isRegister ? 'Zaten hesabınız var mı? Giriş Yapın' : 'Hesabınız yok mu? Hemen Kayıt Olun'}

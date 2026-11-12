@@ -1,4 +1,5 @@
 :root {
+  background-color: #0f172a; /* açık temalı sistemlerde beyaz şerit oluşmasın */
   --bg: #0f172a;
   --card: #1e293b;
   --primary: #3b82f6;
@@ -67,9 +68,7 @@ body {
 }
 
 .dashboard {
-  max-width: 1000px;
-  margin: 2rem auto;
-  padding: 0 1rem;
+  min-height: 100vh;
 }
 
 .server-card {
@@ -92,3 +91,84 @@ body {
   border-radius: 1rem;
   border: 2px solid var(--border);
 }
+
+/* ---- Giriş / kayıt ---- */
+.auth-container {
+  box-sizing: border-box;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  background: radial-gradient(circle at top right, #1e293b, #0f172a);
+}
+.brand { text-align: center; margin-bottom: 1.5rem; }
+.logo-icon { font-size: 2rem; }
+.brand h2 { margin: 0.5rem 0 0; font-size: 1.4rem; }
+.auth-form { display: flex; flex-direction: column; gap: 0.9rem; }
+input {
+  box-sizing: border-box;
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.6rem;
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+input:focus { outline: none; border-color: var(--primary); }
+.toggle-auth { text-align: center; color: var(--text-muted); cursor: pointer; margin: 1.2rem 0 0; font-size: 0.9rem; }
+.toggle-auth:hover { color: var(--primary); }
+
+/* ---- Panel ---- */
+.dash-header {
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+}
+.dash-brand h1 { font-size: 1.25rem; margin: 0; }
+.dash-brand span { color: var(--primary); }
+.user-nav { display: flex; align-items: center; gap: 1rem; }
+.user-badge { color: var(--text-muted); font-size: 0.9rem; }
+.logout-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 0.4rem 0.9rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+.logout-btn:hover { border-color: var(--danger); color: var(--danger); }
+.content { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }
+.server-form-section, .server-list-section { margin-bottom: 2rem; }
+.content h3 { margin: 0 0 1rem; font-size: 1.05rem; }
+.grid-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 1.25rem;
+  border-radius: 1rem;
+}
+.add-btn { background: var(--success); border: none; color: #fff; padding: 0.75rem; border-radius: 0.6rem; font-weight: 600; cursor: pointer; }
+.server-grid { display: flex; flex-direction: column; }
+.server-info h4 { margin: 0 0 0.35rem; }
+.server-info code { color: var(--text-muted); }
+.server-actions { display: flex; gap: 0.6rem; }
+.term-btn { background: var(--primary); border: none; color: #fff; padding: 0.5rem 1.1rem; border-radius: 0.5rem; cursor: pointer; font-weight: 600; }
+.del-btn { background: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer; }
+.empty-state { text-align: center; color: var(--text-muted); padding: 2rem; border: 1px dashed var(--border); border-radius: 1rem; }
+
+/* ---- Terminal oturumu ---- */
+.terminal-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; z-index: 10; }
+.terminal-header { display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 1.5rem; background: var(--card); border-bottom: 1px solid var(--border); }
+.status-indicator { display: flex; align-items: center; gap: 0.6rem; color: var(--text-muted); }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--success); box-shadow: 0 0 8px var(--success); }
+.close-btn { background: var(--danger); border: none; color: #fff; padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer; font-weight: 600; }
+.terminal-container { flex: 1; padding: 1.5rem; overflow: auto; }

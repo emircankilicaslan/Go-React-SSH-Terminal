@@ -84,6 +84,10 @@ GitHub Actions runs formatting, vet, race-enabled tests, lint and the production
 
 ## Screenshots
 
-   <img width="1150" height="686" alt="image" src="https://github.com/user-attachments/assets/01804344-84c2-4425-889b-53f280385ac7" />
+Running locally with a real SSH server as the target (Go backend + React frontend):
 
-   <img width="1449" height="895" alt="image" src="https://github.com/user-attachments/assets/89ecf57b-f5d4-4db8-b1f7-25db6b0f0fb9" />
+![Login](docs/screenshots/giris.jpg)
+
+![Server list](docs/screenshots/sunucu-listesi.jpg)
+
+![SSH session in the browser](docs/screenshots/terminal.jpg)
