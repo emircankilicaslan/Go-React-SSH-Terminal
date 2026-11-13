@@ -1,6 +1,6 @@
 # Go-React-SSH-Terminal – Tarayıcıdan SSH Terminali
 
-![CI](https://github.com/emircankilicaslan/Go-React-SSH-Terminal/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/emircankilicaslan/Go-React-SSH-Terminal/actions/workflows/ci.yml/badge.svg) ![Lisans: MIT](https://img.shields.io/badge/Lisans-MIT-green.svg)
 
 > **English summary:** A web-based SSH terminal built with Go (Gin) and React (xterm.js). Users sign up, save servers and open real SSH sessions in the browser over a WebSocket bridge. Security highlights: JWT auth, AES-256-GCM encrypted stored passwords, single-use WebSocket tickets, trust-on-first-use host key pinning. 14 backend tests, CI on GitHub Actions.
 
@@ -93,3 +93,7 @@ Hedef olarak gerçek bir SSH sunucusuyla yerelde çalışan uygulama (Go arka u�
 ![Sunucu listesi](docs/screenshots/sunucu-listesi.jpg)
 
 ![Tarayıcıda SSH oturumu](docs/screenshots/terminal.jpg)
+
+## Lisans
+
+Bu proje [MIT Lisansı](LICENSE) ile paylaşılmaktadır.
